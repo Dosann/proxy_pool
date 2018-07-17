@@ -27,6 +27,8 @@ from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
 from Util.utilFunction import verifyProxyFormat
 
+from lxml import etree
+
 # for debug to disable insecureWarning
 requests.packages.urllib3.disable_warnings()
 
@@ -307,6 +309,20 @@ class GetFreeProxy(object):
             proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
             for proxy in proxies:
                 yield ':'.join(proxy)
+    
+    @staticmethod
+    def freeProxyWallFourth():
+        urls = ['https://free-proxy-list.net']
+        request = WebRequest()
+        for url in urls:
+            r = request.get(url)
+            html = etree.HTML(r.text)
+            tbody = html.xpath('//tbody')[0]
+            proxies = [':'.join([tr[0].text, tr[1].text]) for tr in tbody]
+            proxies = list(set(proxies))
+            for proxy in proxies:
+                yield proxy
+
 
 
 if __name__ == '__main__':
